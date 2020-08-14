@@ -3,6 +3,8 @@ session_start();
 
 $mensaje="";
 
+//FUNCIONES PARA INGRESAR PRODUCTOS AL CARRITO DE COMPRAS
+
 if(isset($_POST['btnAccion'])){
 
     switch($_POST['btnAccion']){
@@ -57,10 +59,10 @@ if(isset($_POST['btnAccion'])){
             $_SESSION['CARRITO'][$NumeroProductos]=$producto;
             $mensaje="Producto Agregado al Carrito";
         }
-      // $mensaje=print_r($_SESSION,true);
       $mensaje="Producto Agregado al Carrito";
     break;
 
+//FUNCION PARA ELIMINAR PRODUCTOS DEL CARRITO DE COMPRA
     case "Eliminar":
         if(is_numeric(openssl_decrypt($_POST['id'],COD,KEY))){
             $ID=openssl_decrypt($_POST['id'],COD,KEY);

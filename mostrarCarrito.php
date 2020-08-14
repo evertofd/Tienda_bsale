@@ -5,28 +5,35 @@ include 'templates/header.php';
 ?>
 
 <br>
-<h3>Lista del Carrito</h3>
-<?php if(!empty($_SESSION['CARRITO'])){ ?>
 
-<table class="table table-light table-bordered">
+<h3 class="titleCar">Lista del Carrito</h3>
+
+<!--ESTRUCTURA PARA MOSTRAR-->
+
+<?php if(!empty($_SESSION['CARRITO'])){ ?>
+    <div class="table-responsive-sm">
+
+ <!-- LISTA DE ARTICULOS EN EL CARRO DE COMPRAS-->
+
+<table class="table table-light thead-dark table-bordered">
     <tbody>
         <tr>
-            <th width="40%">Descripcion</th>
-            <th width="12%" class="text-center">Cantidad</th>
-            <th width="12%" class="text-center">Precio</th>
-            <th width="12%" class="text-center">Descuento</th>
-            <th width="20%" class="text-center">Total</th>
-            <th width="5%" class="text-center">---</th>
+            <th >Descripcion</th>
+            <th  class="text-center ">Cantidad</th>
+            <th  class="text-center">Precio</th>
+            <th  class="text-center">Descuento</th>
+            <th  class="text-center">Total</th>
+            <th class="text-center">---</th>
         </tr>
         <?php $total=0;?>
         <?php foreach($_SESSION['CARRITO'] as $indice=>$producto){?>
         <tr>
-            <td width="40%"><?php echo $producto['NAME'] ?></td>
-            <td width="12%" class="text-center"><?php echo $producto['CANTIDAD'] ?></td>
-            <td width="12%"class="text-center">$<?php echo $producto['PRICE'] ?></td>
-            <td width="12%" class="text-center">$<?php echo $producto['DISCOUNT'] ?></td>
-            <td width="20%" class="text-center">$<?php echo number_format($producto['PRICE'] - ($producto['DISCOUNT']/100*($producto['PRICE'])) * $producto['CANTIDAD'],2 ); ?></td>
-            <td width="5%" >
+            <td ><?php echo $producto['NAME'] ?></td>
+            <td  class="text-center"><?php echo $producto['CANTIDAD'] ?></td>
+            <td class="text-center">$<?php echo $producto['PRICE'] ?></td>
+            <td  class="text-center">$<?php echo $producto['DISCOUNT'] ?></td>
+            <td  class="text-center">$<?php echo number_format($producto['PRICE'] - ($producto['DISCOUNT']/100*($producto['PRICE'])) * $producto['CANTIDAD'],2 ); ?></td>
+            <td >
                 
             <form action="" method="post">
             <input type="hidden" name="id" id="id" value="<?php echo openssl_encrypt($producto['ID'],COD,KEY) ; ?>">
@@ -43,11 +50,19 @@ include 'templates/header.php';
         </tr>
 
         <tr>
-            <td colspan="5">
+            <td colspan="5" >
+            </td>
+        </tr>
+    </tbody>
+</table>
+</div>
 
-            <form action="pagar.php" method="post">
-                <div class="alert alert-success" role="alert">
-                <div class="form-group">
+<!--FORMULARIO DE ENVIO-->
+
+<div class="col-md-12 col-sm-4 mb-5">
+    <form action="pagar.php" method="post" class="col-md-12 col-sm-4">
+        <div class="alert alert-success" role="alert">
+            <div class="form-group">
                 <label for="my-input">Nombre y Apellido:</label>
                     <input id="name" class="form-control" type="text" name="name" placeholder="Nombre y Apellido" required>
 
@@ -57,20 +72,18 @@ include 'templates/header.php';
                     <label for="my-input">Correo de Contacto:</label>
                     <input id="email" class="form-control" type="email" name="email" placeholder="Email"
                     required>
-                </div>
+            </div>
                 <small id="emailHelp" class="form-text text-muted">El detalle de la compra se enviara a su correo</small>
-                </div>
-               <button class="btn btn-primary btn-lg btn-block" type="submit" value="proceder" name="btn-Accion">Proceder a pagar >></button>
-            </form>
-            </td>
-        </tr>
-    </tbody>
-</table>
-<?php }else{ ?>
-    <div class="alert alert-success">
-        No hay productos en el carrito
-    </div>
-<?php }  ?>
+        </div>
+        <button class="btn btn-primary btn-lg btn-block " type="submit" value="proceder" name="btn-Accion">Proceder a pagar >></button>
+    </form>
+
+</div>
+    <?php }else{ ?>
+        <div class="alert alert-success">
+            No hay productos en el carrito
+        </div>
+    <?php }  ?>
 <?php
 include 'templates/footer.php';
 ?>

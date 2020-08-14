@@ -4,33 +4,25 @@ include 'global/conexion.php';
 include 'carrito.php';
 include 'templates/header.php';
 ?>
-
-
         <br>
         <?php if($mensaje!=""){ ?>
         <div class="alert alert-success" role="alert">
         <?php echo $mensaje;?> 
-           
             <a href="mostrarCarrito.php" class="badge badge-success">Ver Carrito</a>
         </div>
         <?php }?>
 
-
-
         <div class="row">
-
         <?php 
          $sentencia=$pdo->prepare("SELECT * FROM `product`");
          $sentencia->execute();
          $listaProductos=$sentencia->fetchAll(PDO::FETCH_ASSOC);
-         $articulos_x_pagina = 6;
+         $articulos_x_pagina = 12;
 
          //CONTAR ARTICULOS
          $total_articulos_db=$sentencia->rowCount();
-         $paginas =  $total_articulos_db / 6;
+         $paginas =  $total_articulos_db / 12;
          $paginas = ceil($paginas);
-        
-         
         ?>
 
         <?php 
@@ -38,7 +30,7 @@ include 'templates/header.php';
           header('Location:index.php?pagina=1');
         }
         
-        
+        //CALCULO PARA LA PAGINACIÓN
         $iniciar = ($_GET['pagina']-1)* $articulos_x_pagina;
         $sentencia_articulos = $sentencia=$pdo->prepare("SELECT * FROM `product` LIMIT :iniciar,:narticulos");
         $sentencia_articulos->bindParam(':iniciar', $iniciar,PDO::PARAM_INT);
@@ -47,8 +39,11 @@ include 'templates/header.php';
         $resultado_articulos = $sentencia_articulos->fetchAll();
 
         ?>
+
+        <!--LISTADO DE PRODUCTOS -->
+
         <?php foreach($resultado_articulos as $producto){ ?>
-            <div class="col-4">
+            <div class="col-md-4 col-sm-6 mt-5 mb-5">
                 <div class="card">
                     <img 
                     title="<?php echo $producto['name']; ?>"
@@ -72,7 +67,7 @@ include 'templates/header.php';
                             <input type="hidden" name="price" id="price" value="<?php echo openssl_encrypt($producto['price'],COD,KEY); ?>">
                             <input type="hidden" name="discount" id="discount" value="<?php echo openssl_encrypt($producto['discount'],COD,KEY); ?>">
                             <input type="hidden" name="cantidad" id="cantidad" value="<?php echo openssl_encrypt(1,COD,KEY); ?>">
-                        <button class="btn btn-primary" name= "btnAccion" value="Agregar" type="submit" type="button">Agregar Al carrito</button>
+                        <button class="btn btn-success" name= "btnAccion" value="Agregar" type="submit" type="button">Agregar Al carrito</button>
                         </form>
                        
                     </div>
@@ -86,17 +81,12 @@ include 'templates/header.php';
 <nav aria-label="Page navigation example">
   <ul class="pagination justify-content-center">
     <li class="page-item  <?php echo $_GET['pagina']<=1?'disable':' ' ?>">
-      
-    
     <a class="page-link" 
     href="index.php?pagina=<?php echo $_GET["pagina"]-1?>" 
     tabindex="-1" aria-disabled="true">
-      Anterior
-    
-    </a>
+      Anterior</a>
     </li>
-
-    <?php for($i=0;$i < $paginas; $i++):?>
+     <?php for($i=0;$i < $paginas; $i++):?>
           <li class="page-item  <?php echo $_GET['pagina']==$i+1? 'active' : ' ' ?>">
             <a class="page-link" href="index.php?pagina=<?php echo $i +1 ?>">
            <?php echo $i +1 ?>
@@ -104,20 +94,13 @@ include 'templates/header.php';
           </li>
     
       <?php endfor ?>
-    
-    
-    <li class="page-item  <?php echo $_GET['pagina'] >=$paginas ? 'disable' : ' ' ?>">
-     
+
+        <li class="page-item  <?php echo $_GET['pagina'] >=$paginas ? 'disable' : ' ' ?>">
       <a class="page-link"  href="index.php?pagina=<?php echo $i +1 ?>">Siguiente</a>
     </li>
   </ul>
 </nav>
 
-    <script>
-        $(function () {
-  $('[data-toggle="popover"]').popover()
-            });
-    </script>
 
 <?php
 include 'templates/footer.php';
