@@ -1,44 +1,21 @@
 <?php
 include 'global/config.php';
 include 'global/conexion.php';
+include 'carrito.php';
+include 'templates/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tienda</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
-</head>
-<body>
-    
-    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-        <a class="navbar-brand" hfre="index.php">Logo de la Empresa</a>
-        <button class="navbar-toggler" data-target="#my-nav" data-toggle="collapse" aria-controls="my-nav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div id="my-nav" class="collapse navbar-collapse">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="index.php">Home <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Carrito(0)</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
-    <br>
-    <div class="container">
+
         <br>
+        <?php if($mensaje!=""){ ?>
         <div class="alert alert-success" role="alert">
-            Pantalla de Mensaje... 
-            <a href="#" class="badge badge-success">Ver Carrito</a>
+        <?php echo $mensaje;?> 
+           
+            <a href="mostrarCarrito.php" class="badge badge-success">Ver Carrito</a>
         </div>
+        <?php }?>
+
+
 
         <div class="row">
 
@@ -46,21 +23,58 @@ include 'global/conexion.php';
          $sentencia=$pdo->prepare("SELECT * FROM `product`");
          $sentencia->execute();
          $listaProductos=$sentencia->fetchAll(PDO::FETCH_ASSOC);
+         $articulos_x_pagina = 6;
+
+         //CONTAR ARTICULOS
+         $total_articulos_db=$sentencia->rowCount();
+         $paginas =  $total_articulos_db / 6;
+         $paginas = ceil($paginas);
+        
          
         ?>
-        <?php foreach($listaProductos as $producto){ ?>
-            <div class="col-3">
+
+        <?php 
+        if(!$_GET){
+          header('Location:index.php?pagina=1');
+        }
+        
+        
+        $iniciar = ($_GET['pagina']-1)* $articulos_x_pagina;
+        $sentencia_articulos = $sentencia=$pdo->prepare("SELECT * FROM `product` LIMIT :iniciar,:narticulos");
+        $sentencia_articulos->bindParam(':iniciar', $iniciar,PDO::PARAM_INT);
+        $sentencia_articulos->bindParam(':narticulos', $articulos_x_pagina,PDO::PARAM_INT);
+        $sentencia_articulos->execute();
+        $resultado_articulos = $sentencia_articulos->fetchAll();
+
+        ?>
+        <?php foreach($resultado_articulos as $producto){ ?>
+            <div class="col-4">
                 <div class="card">
                     <img 
                     title="<?php echo $producto['name']; ?>"
                     alt="<?php echo $producto['name']; ?>"
                     class="card-img-top"
-                     src="<?php echo $producto['url_image']; ?>" alt="">
+                     src="<?php echo $producto['url_image']; ?>" alt=""
+                     data-toggle="popover" 
+                     data-trigger="hover"
+                     data-content="$<?php echo $producto['price'];?>"
+                     width="250px"
+                     height="200px"
+                     >
+                        
                     <div class="card-body">
                         <span><?php echo $producto['name']; ?></span>
                         <h5 class="card-title">$<?php echo $producto['price']; ?></h5>
                         <p class="card-text"><?php echo $producto['category']; ?></p>
+                        <form action="" method="post">
+                            <input type="hidden" name="id" id="id" value="<?php echo openssl_encrypt($producto['id'],COD,KEY) ; ?>">
+                            <input type="hidden" name="name" id="name" value="<?php echo openssl_encrypt($producto['name'],COD,KEY); ?>">
+                            <input type="hidden" name="price" id="price" value="<?php echo openssl_encrypt($producto['price'],COD,KEY); ?>">
+                            <input type="hidden" name="discount" id="discount" value="<?php echo openssl_encrypt($producto['discount'],COD,KEY); ?>">
+                            <input type="hidden" name="cantidad" id="cantidad" value="<?php echo openssl_encrypt(1,COD,KEY); ?>">
                         <button class="btn btn-primary" name= "btnAccion" value="Agregar" type="submit" type="button">Agregar Al carrito</button>
+                        </form>
+                       
                     </div>
                 </div>
             </div>
@@ -68,5 +82,43 @@ include 'global/conexion.php';
             
         </div>
     </div>
-</body>
-</html>
+
+<nav aria-label="Page navigation example">
+  <ul class="pagination justify-content-center">
+    <li class="page-item  <?php echo $_GET['pagina']<=1?'disable':' ' ?>">
+      
+    
+    <a class="page-link" 
+    href="index.php?pagina=<?php echo $_GET["pagina"]-1?>" 
+    tabindex="-1" aria-disabled="true">
+      Anterior
+    
+    </a>
+    </li>
+
+    <?php for($i=0;$i < $paginas; $i++):?>
+          <li class="page-item  <?php echo $_GET['pagina']==$i+1? 'active' : ' ' ?>">
+            <a class="page-link" href="index.php?pagina=<?php echo $i +1 ?>">
+           <?php echo $i +1 ?>
+            </a>
+          </li>
+    
+      <?php endfor ?>
+    
+    
+    <li class="page-item  <?php echo $_GET['pagina'] >=$paginas ? 'disable' : ' ' ?>">
+     
+      <a class="page-link"  href="index.php?pagina=<?php echo $i +1 ?>">Siguiente</a>
+    </li>
+  </ul>
+</nav>
+
+    <script>
+        $(function () {
+  $('[data-toggle="popover"]').popover()
+            });
+    </script>
+
+<?php
+include 'templates/footer.php';
+?>
