@@ -45,8 +45,14 @@
              </div>
         <?php };
     }else{
-    	$salida.="PRODUCTO NO ENCONTRADO";
+    	$salida.=" <div class='container text-center'>
+                    <h2>PRODUCTO NO ENCONTRADO</h2>
+                  </div>";
     }
     echo $salida;
     $conn->close();
 ?>
+
+
+
+</div>
